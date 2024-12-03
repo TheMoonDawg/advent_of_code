@@ -14,6 +14,6 @@ defmodule Solver do
   end
 
   def day_module(year, day) do
-    String.to_atom("Elixir.Year#{year}Day#{day}")
+    String.to_atom("Elixir.Solutions.Year#{year}Day#{day}")
   end
 end

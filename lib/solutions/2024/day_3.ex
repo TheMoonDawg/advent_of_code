@@ -1,0 +1,23 @@
+defmodule Solutions.Year2024Day3 do
+  @behaviour Solution
+
+  @test_input """
+  INPUT_HERE
+  """
+
+  @doc """
+  iex> solve_part_1(#{inspect(@test_input)})
+  nil
+  """
+  def solve_part_1(_input) do
+    nil
+  end
+
+  @doc """
+  iex> solve_part_2(#{inspect(@test_input)})
+  nil
+  """
+  def solve_part_2(_input) do
+    nil
+  end
+end

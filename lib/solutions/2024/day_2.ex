@@ -1,4 +1,4 @@
-defmodule Year2024Day2 do
+defmodule Solutions.Year2024Day2 do
   @behaviour Solution
 
   @test_input """
