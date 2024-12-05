@@ -113,7 +113,7 @@ defmodule Solutions.Year2024Day4 do
   defp parse_input(input) do
     input
     |> String.split("\n", trim: true)
-    |> Enum.map(&String.codepoints/1)
+    |> Enum.map(&String.graphemes/1)
   end
 
   defp get_letter(puzzle, row, column) do
