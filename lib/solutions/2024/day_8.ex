@@ -54,7 +54,7 @@ defmodule Solutions.Year2024Day8 do
 
   @doc """
   iex> solve_part_2(#{inspect(@test_input)})
-  nil
+  34
   """
   def solve_part_2(input) do
     {antennas, size} = parse_input(input)

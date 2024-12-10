@@ -8,4 +8,6 @@ defmodule DayTest do
   doctest Solutions.Year2024Day5, import: true, tags: [:day_5]
   doctest Solutions.Year2024Day6, import: true, tags: [:day_6]
   doctest Solutions.Year2024Day7, import: true, tags: [:day_7]
+  doctest Solutions.Year2024Day8, import: true, tags: [:day_8]
+  doctest Solutions.Year2024Day9, import: true, tags: [:day_9]
 end
