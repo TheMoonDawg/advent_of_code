@@ -16,6 +16,6 @@ defmodule Aoc.MixProject do
   end
 
   defp deps do
-    []
+    [{:nx, "~> 0.5"}]
   end
 end
