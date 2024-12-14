@@ -18,7 +18,7 @@ defmodule Solutions.Year2024Day14 do
 
   @doc """
   iex> solve_part_1(#{inspect(@test_input)}, {11, 7})
-  nil
+  12
   """
   def solve_part_1(input, grid_size \\ {101, 103}) do
     # grid_size = {11, 7}
@@ -67,10 +67,35 @@ defmodule Solutions.Year2024Day14 do
   end
 
   @doc """
-  iex> solve_part_2(#{inspect(@test_input)})
-  nil
+  Part 2, but not testable!
   """
-  def solve_part_2(_input) do
+  def solve_part_2(input) do
+    grid_size = {101, 103}
+    robots = parse_input(input)
+    {width, height} = grid_size
+
+    base_map =
+      for x <- 0..(width - 1), y <- 0..(height - 1), reduce: %{} do
+        acc -> Map.update(acc, y, %{x => " "}, &Map.put(&1, x, " "))
+      end
+
+    for x <- 1..1_000_000, reduce: robots do
+      acc ->
+        new_robots =
+          Enum.map(acc, fn robot ->
+            {x, y} = robot.position
+            {x_offset, y_offset} = robot.velocity
+            new_x = get_coord(x, x_offset, width)
+            new_y = get_coord(y, y_offset, height)
+
+            Map.put(robot, :position, {new_x, new_y})
+          end)
+
+        draw_map(base_map, new_robots, x)
+
+        new_robots
+    end
+
     nil
   end
 
@@ -89,5 +114,61 @@ defmodule Solutions.Year2024Day14 do
         velocity: {String.to_integer(velocity["x"]), String.to_integer(velocity["y"])}
       }
     end)
+  end
+
+  defp draw_map(map, robots, seconds) do
+    new_map =
+      Enum.reduce(robots, map, fn robot, acc_map ->
+        {x, y} = robot.position
+        Map.update!(acc_map, x, &Map.put(&1, y, "O"))
+      end)
+
+    robot_positions =
+      robots
+      |> Enum.map(& &1.position)
+      |> MapSet.new()
+
+    maybe_tree? =
+      Enum.any?(robot_positions, fn {x, y} ->
+        surrounding_offsets = [
+          {-1, 0},
+          {0, -1},
+          {1, 0},
+          {0, 1},
+          {-1, -1},
+          {1, 1},
+          {-1, 1},
+          {1, -1}
+        ]
+
+        matches? =
+          Enum.all?(surrounding_offsets, fn {x_offset, y_offset} ->
+            MapSet.member?(robot_positions, {x + x_offset, y + y_offset})
+          end)
+
+        if(matches?, do: IO.inspect({x, y}))
+
+        matches?
+      end)
+
+    if maybe_tree? do
+      IO.puts("------------------------------")
+      IO.puts("Map for #{seconds} seconds")
+      IO.puts("------------------------------")
+
+      new_map
+      |> Map.to_list()
+      |> Enum.sort_by(&elem(&1, 0))
+      |> Enum.map(fn {_i, row} ->
+        row
+        |> Map.to_list()
+        |> Enum.sort_by(&elem(&1, 0))
+        |> Enum.map(&elem(&1, 1))
+        |> Enum.join()
+        |> IO.puts()
+      end)
+
+      IO.gets("Is this a Christmas tree...? (Press Enter to try again):")
+    end
   end
 end
