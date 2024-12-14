@@ -29,6 +29,23 @@ defmodule Solutions.Year2024Day12 do
   # EEEC
   # """
 
+  # @test_input4 """
+  # EEEEE
+  # EXXXX
+  # EEEEE
+  # EXXXX
+  # EEEEE
+  # """
+
+  # @test_input5 """
+  # AAAAAA
+  # AAABBA
+  # AAABBA
+  # ABBAAA
+  # ABBAAA
+  # AAAAAA
+  # """
+
   @doc """
   iex> solve_part_1(#{inspect(@test_input)})
   1930
@@ -62,6 +79,7 @@ defmodule Solutions.Year2024Day12 do
     region
     |> Enum.map(fn {row, col} ->
       get_cardinal_offsets()
+      |> Map.values()
       |> Enum.map(fn {r_offset, c_offset} -> {row + r_offset, col + c_offset} end)
       |> Enum.reject(&MapSet.member?(region, &1))
       |> Enum.count()
@@ -74,7 +92,7 @@ defmodule Solutions.Year2024Day12 do
   1206
   """
   def solve_part_2(input) do
-    plots = parse_input(@test_input)
+    plots = parse_input(input)
     {height, width} = get_bounds(plots)
 
     {regions, _} =
@@ -91,11 +109,68 @@ defmodule Solutions.Year2024Day12 do
     regions
     |> Enum.map(fn region ->
       area = MapSet.size(region)
-      perimeter = get_perimeter(region)
+      sides = get_sides(region)
 
-      area * perimeter
+      area * sides
     end)
     |> Enum.sum()
+  end
+
+  defp get_sides(region) do
+    region
+    |> Enum.reject(fn {row, col} ->
+      # Toss out any non-edge vertices
+      get_cardinal_offsets()
+      |> Map.values()
+      |> Enum.map(fn {r_offset, c_offset} -> {row + r_offset, col + c_offset} end)
+      |> Enum.all?(&MapSet.member?(region, &1))
+    end)
+    |> Enum.reduce(MapSet.new(), fn {row, col}, acc ->
+      # Filter down to cardinal direction edges
+      get_cardinal_offsets()
+      |> Enum.reject(fn {_direction, {r_offset, c_offset}} ->
+        coords = {row + r_offset, col + c_offset}
+        MapSet.member?(region, coords)
+      end)
+      |> Enum.map(&elem(&1, 0))
+      |> Enum.reduce(acc, fn direction, lines ->
+        line_points = traverse_sides(region, row, col, direction, MapSet.new())
+
+        MapSet.put(lines, {direction, line_points})
+      end)
+    end)
+    |> MapSet.size()
+  end
+
+  defp traverse_sides(region, row, col, direction, line_points) do
+    {r_offset, c_offset} = get_cardinal_offsets()[direction]
+
+    cond do
+      # Already traversed this path
+      MapSet.member?(line_points, {row, col}) ->
+        line_points
+
+      # Not in region
+      not MapSet.member?(region, {row, col}) ->
+        line_points
+
+      # End of line
+      MapSet.member?(region, {row + r_offset, col + c_offset}) ->
+        line_points
+
+      true ->
+        new_line_points = MapSet.put(line_points, {row, col})
+
+        case direction do
+          :north -> [{0, -1}, {0, 1}]
+          :east -> [{-1, 0}, {1, 0}]
+          :south -> [{0, -1}, {0, 1}]
+          :west -> [{-1, 0}, {1, 0}]
+        end
+        |> Enum.reduce(new_line_points, fn {r_offset, c_offset}, line_points ->
+          traverse_sides(region, row + r_offset, col + c_offset, direction, line_points)
+        end)
+    end
   end
 
   defp parse_input(input) do
@@ -126,6 +201,7 @@ defmodule Solutions.Year2024Day12 do
     new_region_plots = MapSet.put(region_plots, {row, col})
 
     get_cardinal_offsets()
+    |> Map.values()
     |> Enum.map(fn {r_offset, c_offset} -> {row + r_offset, col + c_offset} end)
     |> Enum.filter(fn {row, col} ->
       plots[row][col] == region and not MapSet.member?(region_plots, {row, col}) and
@@ -137,7 +213,12 @@ defmodule Solutions.Year2024Day12 do
   end
 
   defp get_cardinal_offsets do
-    [{-1, 0}, {0, -1}, {1, 0}, {0, 1}]
+    %{
+      north: {-1, 0},
+      east: {0, 1},
+      south: {1, 0},
+      west: {0, -1}
+    }
   end
 
   defp get_bounds(plots) do
