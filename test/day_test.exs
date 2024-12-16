@@ -15,4 +15,5 @@ defmodule DayTest do
   doctest Solutions.Year2024Day12, import: true, tags: [:day_12]
   doctest Solutions.Year2024Day13, import: true, tags: [:day_13]
   doctest Solutions.Year2024Day14, import: true, tags: [:day_14]
+  doctest Solutions.Year2024Day15, import: true, tags: [:day_15]
 end
