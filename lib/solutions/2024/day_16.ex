@@ -60,13 +60,13 @@ defmodule Solutions.Year2024Day16 do
     distances =
       graph
       |> Map.keys()
-      |> Enum.map(&{&1, @max_limit})
+      |> Enum.map(&{&1, {@max_limit, []}})
       |> Map.new()
-      |> Map.put(start_pos, 0)
+      |> Map.put(start_pos, {0, []})
 
     final_distances = traverse_graph(graph, queue, distances)
 
-    final_distances[end_pos]
+    elem(final_distances[end_pos], 0)
   end
 
   defp traverse_graph(_graph, [], distances), do: distances
@@ -75,7 +75,7 @@ defmodule Solutions.Year2024Day16 do
     {{vertex, vertex_distance, direction}, popped_queue} = List.pop_at(queue, 0)
 
     # We've already traversed this
-    if distances[vertex] < vertex_distance do
+    if elem(distances[vertex], 0) < vertex_distance do
       traverse_graph(graph, popped_queue, distances)
     else
       {new_queue, new_distances} =
@@ -85,14 +85,30 @@ defmodule Solutions.Year2024Day16 do
 
           new_distance = vertex_distance + weight
 
-          if new_distance < distances[edge] do
-            new_queue = push(queue, edge, new_distance, new_direction)
-            new_distances = Map.put(distances, edge, new_distance)
+          existing_distance = elem(distances[edge], 0)
+          same_distance? = abs(new_distance - existing_distance) == 1000
 
-            {new_queue, new_distances}
-          else
-            {queue, distances}
-          end
+          new_distances =
+            if new_distance <= existing_distance or same_distance? do
+              Map.update(distances, edge, {new_distance, [vertex]}, fn {distance, vertices} ->
+                if new_distance < distance and not same_distance? do
+                  {new_distance, [vertex]}
+                else
+                  {distance, [vertex | vertices]}
+                end
+              end)
+            else
+              distances
+            end
+
+          new_queue =
+            if new_distance <= existing_distance do
+              push(queue, edge, new_distance, new_direction)
+            else
+              queue
+            end
+
+          {new_queue, new_distances}
         end)
 
       traverse_graph(graph, new_queue, new_distances)
@@ -169,7 +185,39 @@ defmodule Solutions.Year2024Day16 do
   nil
   """
   def solve_part_2(_input) do
-    nil
+    {map, start_pos, end_pos} = parse_input(@test_input2)
+    graph = create_graph(map)
+
+    queue =
+      graph
+      |> Map.keys()
+      |> Enum.reject(&(&1 == start_pos))
+      |> Enum.map(&{&1, @max_limit, nil})
+      |> Enum.concat([{start_pos, 0, :east}])
+      |> Enum.sort_by(&elem(&1, 1))
+
+    distances =
+      graph
+      |> Map.keys()
+      |> Enum.map(&{&1, {@max_limit, []}})
+      |> Map.new()
+      |> Map.put(start_pos, {0, []})
+
+    final_distances = traverse_graph(graph, queue, distances)
+
+    {_distance, vertices} = final_distances[end_pos]
+
+    gather_vertices(final_distances, vertices, MapSet.new([end_pos]))
+    |> MapSet.size()
+  end
+
+  defp gather_vertices(_distances, [], set), do: set
+
+  defp gather_vertices(distances, vertices, set) do
+    Enum.reduce(vertices, set, fn vertex, acc ->
+      {_distance, new_vertices} = distances[vertex]
+      gather_vertices(distances, new_vertices, MapSet.put(acc, vertex))
+    end)
   end
 
   defp parse_input(input) do
