@@ -21,32 +21,32 @@ defmodule Solutions.Year2024Day16 do
   ###############
   """
 
-  # @test_input2 """
-  # #################
-  # #...#...#...#..E#
-  # #.#.#.#.#.#.#.#.#
-  # #.#.#.#...#...#.#
-  # #.#.#.#.###.#.#.#
-  # #...#.#.#.....#.#
-  # #.#.#.#.#.#####.#
-  # #.#...#.#.#.....#
-  # #.#.#####.#.###.#
-  # #.#.#.......#...#
-  # #.#.###.#####.###
-  # #.#.#...#.....#.#
-  # #.#.#.#####.###.#
-  # #.#.#.........#.#
-  # #.#.#.#########.#
-  # #S#.............#
-  # #################
-  # """
+  @test_input2 """
+  #################
+  #...#...#...#..E#
+  #.#.#.#.#.#.#.#.#
+  #.#.#.#...#...#.#
+  #.#.#.#.###.#.#.#
+  #...#.#.#.....#.#
+  #.#.#.#.#.#####.#
+  #.#...#.#.#.....#
+  #.#.#####.#.###.#
+  #.#.#.......#...#
+  #.#.###.#####.###
+  #.#.#...#.....#.#
+  #.#.#.#####.###.#
+  #.#.#.........#.#
+  #.#.#.#########.#
+  #S#.............#
+  #################
+  """
 
   @doc """
   iex> solve_part_1(#{inspect(@test_input)})
   7036
   """
   def solve_part_1(input) do
-    {map, start_pos, end_pos} = parse_input(input)
+    {map, start_pos, end_pos} = parse_input(@test_input2)
     graph = create_graph(map)
 
     queue =
@@ -86,7 +86,7 @@ defmodule Solutions.Year2024Day16 do
           new_distance = vertex_distance + weight
 
           existing_distance = elem(distances[edge], 0)
-          same_distance? = abs(new_distance - existing_distance) == 1000
+          same_distance? = new_distance - existing_distance == 1000
 
           new_distances =
             if new_distance <= existing_distance or same_distance? do
@@ -102,7 +102,7 @@ defmodule Solutions.Year2024Day16 do
             end
 
           new_queue =
-            if new_distance <= existing_distance do
+            if new_distance < existing_distance do
               push(queue, edge, new_distance, new_direction)
             else
               queue
@@ -207,8 +207,88 @@ defmodule Solutions.Year2024Day16 do
 
     {_distance, vertices} = final_distances[end_pos]
 
-    gather_vertices(final_distances, vertices, MapSet.new([end_pos]))
-    |> MapSet.size()
+    set = gather_vertices(final_distances, vertices, MapSet.new([end_pos]))
+
+    IO.inspect(final_distances[{8, 9}])
+    IO.inspect(final_distances[{9, 9}])
+    IO.inspect(final_distances[{9, 10}])
+
+    IO.inspect(
+      MapSet.difference(
+        set,
+        MapSet.new([
+          {15, 1},
+          {14, 1},
+          {13, 1},
+          {12, 1},
+          {11, 1},
+          {10, 1},
+          {9, 1},
+          {8, 1},
+          {7, 1},
+          {6, 1},
+          {5, 1},
+          {5, 2},
+          {5, 3},
+          {6, 3},
+          {7, 3},
+          {8, 3},
+          {9, 3},
+          {10, 3},
+          {11, 3},
+          {12, 3},
+          {13, 3},
+          {14, 3},
+          {15, 3},
+          {15, 4},
+          {15, 5},
+          {14, 5},
+          {13, 5},
+          # Fork 1
+          {12, 5},
+          {11, 5},
+          {11, 6},
+          {11, 7},
+          {10, 7},
+          {9, 7},
+          {9, 8},
+          {9, 9},
+          {9, 10},
+          {9, 11},
+          {8, 11},
+          {7, 11},
+          {7, 12},
+          {7, 13},
+          {7, 14},
+          {7, 15},
+          # Fork 2
+          {13, 6},
+          {13, 7},
+          {13, 8},
+          {13, 9},
+          {13, 10},
+          {13, 11},
+          {12, 11},
+          {11, 11},
+          {11, 12},
+          {11, 13},
+          {10, 13},
+          {9, 13},
+          {9, 14},
+          {9, 15},
+          {8, 15},
+          {7, 15},
+          {6, 15},
+          {5, 15},
+          {4, 15},
+          {3, 15},
+          {2, 15},
+          {1, 15}
+        ])
+      )
+    )
+
+    MapSet.size(set)
   end
 
   defp gather_vertices(_distances, [], set), do: set
@@ -216,6 +296,12 @@ defmodule Solutions.Year2024Day16 do
   defp gather_vertices(distances, vertices, set) do
     Enum.reduce(vertices, set, fn vertex, acc ->
       {_distance, new_vertices} = distances[vertex]
+
+      # if length(new_vertices) > 1 do
+      #   IO.inspect(vertex)
+      #   IO.inspect(new_vertices)
+      # end
+
       gather_vertices(distances, new_vertices, MapSet.put(acc, vertex))
     end)
   end
@@ -241,3 +327,5 @@ defmodule Solutions.Year2024Day16 do
     end)
   end
 end
+
+# 3010
