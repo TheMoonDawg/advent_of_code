@@ -45,7 +45,7 @@ defmodule Solutions.Year2024Day16 do
   iex> solve_part_1(#{inspect(@test_input)})
   7036
   """
-  def solve_part_1(input) do
+  def solve_part_1(_input) do
     {map, start_pos, end_pos} = parse_input(@test_input2)
     graph = create_graph(map)
 

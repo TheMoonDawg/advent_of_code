@@ -4,8 +4,8 @@ defmodule Aoc.MixProject do
   def project do
     [
       app: :aoc,
-      version: "0.1.0",
-      elixir: "~> 1.15.7",
+      version: "0.2.0",
+      elixir: "~> 1.19.3",
       start_permanent: Mix.env() == :prod,
       deps: deps()
     ]
@@ -16,6 +16,6 @@ defmodule Aoc.MixProject do
   end
 
   defp deps do
-    [{:nx, "~> 0.5"}]
+    [{:nx, "~> 0.10"}]
   end
 end
