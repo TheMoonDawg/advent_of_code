@@ -57,11 +57,15 @@ defmodule Solutions.Year2025Day1 do
   end
 
   def parse_input(input) do
-    String.split(input, "\n", trim: true)
+    input
+    |> String.split("\n", trim: true)
+    |> Enum.map(fn line ->
+      {dir, rot} = String.split_at(line, 1)
+      {dir, String.to_integer(rot)}
+    end)
   end
 
-  defp rotate(dial, "L" <> dist) do
-    dist = String.to_integer(dist)
+  defp rotate(dial, {"L", dist}) do
     new_dial = dial - rem(dist, 100)
     adjusted_dial = if(new_dial < 0, do: new_dial + 100, else: new_dial)
 
@@ -71,8 +75,7 @@ defmodule Solutions.Year2025Day1 do
     {adjusted_dial, total_rotations + zero_count}
   end
 
-  defp rotate(dial, "R" <> dist) do
-    dist = String.to_integer(dist)
+  defp rotate(dial, {"R", dist}) do
     new_dial = dial + rem(dist, 100)
     adjusted_dial = if(new_dial > 99, do: new_dial - 100, else: new_dial)
 
